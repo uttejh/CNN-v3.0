@@ -36,7 +36,7 @@ def readAllImages():
 
 	return data
 
-# imagedata = readAllImages() # array of pixel data of all the input data 
+imagedata = readAllImages() # array of pixel data of all the input data 
 
 
 p = Procedures()
@@ -44,11 +44,26 @@ p = Procedures()
 filters1 = []
 filters2 = []
 
-
 # Creating filters for conv layer1
 filters1 = p.initFilters(numOfFiltersLayer1, numOfInputs1, numOfOutputs1, fsize, 1)
 
 filters2 = p.initFilters(numOfFiltersLayer2, numOfInputs2, numOfOutputs2, fsize, numOfFiltersLayer1)
 
-print array(filters1).shape
-print array(filters2).shape
+# Start the timer
+start = time.clock()
+
+# Start the training procedure
+for iterat_epoch in range(epochs):
+	for iterat_image in range(numofInputImages):
+
+		# Read one input at a time
+		input_data = imagedata[iterat_image]
+
+
+		# -----------------------------------------------------------------------------------------------
+		#                     CONVOLUTION --> SIGMOID (Activation Fn) --> POOLING (FIRST ITERATION)
+		# -----------------------------------------------------------------------------------------------
+
+		# ---------------------------------------CONVOLUTION---------------------------------------------
+
+		
