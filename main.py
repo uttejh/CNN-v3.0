@@ -240,10 +240,23 @@ for iterat_epoch in range(epochs):
 
 		d_FC = error_FC*slope_FC
 
-		# each 8*8 connected to 20*12*12
-		dweight_FC = numpy.outer(pool_layer_1, d_FC) #2 -wrong
+		# # each 8*8 connected to 20*12*12
+		# dweight_FC = numpy.outer(pool_layer_1, d_FC) #2 -wrong
 
-		print dweight_FC.shape
+		# 40*8*8 * 20*12*12
+
+		d_FC_2D = numpy.reshape(d_FC, (numOfFiltersLayer2, (FC.shape[0]/numOfFiltersLayer2)))
+
+		# 40*4*4 = 40
+		d_FC_sum = numpy.sum(d_FC_2D, axis=1)
+
+		dweight_C2 = numpy.outer(d_FC_sum, pool_layer_1)
+
+		dw_c2 = numpy.sum(dweight_C2, axis=1)
+
+		print dw_c2
+		print filters2[0][0]
+
 
 
 tt = time.clock()-start
