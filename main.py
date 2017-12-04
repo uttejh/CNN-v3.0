@@ -240,11 +240,6 @@ for iterat_epoch in range(epochs):
 
 		d_FC = error_FC*slope_FC
 
-		# # each 8*8 connected to 20*12*12
-		# dweight_FC = numpy.outer(pool_layer_1, d_FC) #2 -wrong
-
-		# 40*8*8 * 20*12*12
-
 		d_FC_2D = numpy.reshape(d_FC, (numOfFiltersLayer2, (FC.shape[0]/numOfFiltersLayer2)))
 
 		# 40*4*4 = 40
@@ -254,10 +249,15 @@ for iterat_epoch in range(epochs):
 
 		dw_c2 = numpy.sum(dweight_C2, axis=1)
 
-		print dw_c2
-		print filters2[0][0]
+		# weight updation
+		for i in range(numOfFiltersLayer2):
+			w = filters2[i]
 
+			filters2[i] = w + alpha*(dw_c2[i])			
 
+		# --------------------- CONVOLUTION LAYER 1 <-- CONVOLUTION LAYER 2 -----------------------------------
+
+		
 
 tt = time.clock()-start
 print tt
