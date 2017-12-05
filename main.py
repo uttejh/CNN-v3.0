@@ -151,11 +151,12 @@ for iterat_epoch in range(epochs):
 		convolution_layer_2 = p.convolution(array(pool_layer_1), filters2, numOfFiltersLayer2, numOfFiltersLayer1, fsize, b1)
 		
 		convolution_layer_2_shape = array(convolution_layer_2).shape
-
+		# print convolution_layer_2
 		# Batch normalization
 		convolution_layer_2_values=[]
 		for i in range(convolution_layer_2_shape[0]):
 			convolution_layer_2_values.append(zscore(convolution_layer_2[0]))
+		# print convolution_layer_2_valu	es[0]
 
 		# -------------------------------------- SIGMOID ACTIVATION --------------------------------------------
 
@@ -240,24 +241,37 @@ for iterat_epoch in range(epochs):
 
 		d_FC = error_FC*slope_FC
 
-		d_FC_2D = numpy.reshape(d_FC, (numOfFiltersLayer2, (FC.shape[0]/numOfFiltersLayer2)))
+		d_FC_3D = numpy.reshape(d_FC, (numOfFiltersLayer2, 4,4))
 
-		# 40*4*4 = 40
-		d_FC_sum = numpy.sum(d_FC_2D, axis=1)
+		d_FC_2D = numpy.reshape(d_FC, (numOfFiltersLayer2, 4*4))
 
-		dweight_C2 = numpy.outer(d_FC_sum, pool_layer_1)
+		index2_reshape = numpy.reshape(index2, (numOfFiltersLayer2,4*4))	
 
-		dw_c2 = numpy.sum(dweight_C2, axis=1)
-
-		# weight updation
+		d_FC_new = []
 		for i in range(numOfFiltersLayer2):
+			scalar_dw = numpy.outer(d_FC_3D[i], pool_layer_1)
+			dw_c2 = numpy.sum(scalar_dw)
+
 			w = filters2[i]
 
-			filters2[i] = w + alpha*(dw_c2[i])			
+			# Weight updation
+			filters2[i] = w + alpha*(dw_c2)	
+
+			tomodify = numpy.zeros((8*8))
+			xx = index2_reshape[i].astype(int)
+			yy = d_FC_2D[i]
+
+			for (ind, rep) in zip(xx, yy):
+					tomodify[ind] = rep	
+			d_FC_new.append(tomodify)
 
 		# --------------------- CONVOLUTION LAYER 1 <-- CONVOLUTION LAYER 2 -----------------------------------
 
+		# slope_conv2 = derivative(pool_layer_1)
+
+		# error_conv2 = numpy.dot()
 		
+
 
 tt = time.clock()-start
 print tt
