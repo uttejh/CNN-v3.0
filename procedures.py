@@ -49,8 +49,7 @@ class Procedures:
 		    __global double* b,
 		    __global double* c,
 		    const unsigned int M,
-		    const unsigned int N,
-		    float bias)
+		    const unsigned int N)
 		{
 		    int row = get_global_id(0); 
 		    int col = get_global_id(1); 
@@ -105,7 +104,7 @@ class Procedures:
 					//}else{
 					//	c[row*(M-N+1) + col] = temp + bias;
 					//}
-					c[row*(M-N+1) + col] = temp + bias;
+					c[row*(M-N+1) + col] = temp ;
 				}
 
 			}
@@ -119,7 +118,7 @@ class Procedures:
 		program = cl.Program(context, kernelsource).build()
 
 		convolute = program.convolute
-		convolute.set_scalar_arg_dtypes([None, None, None, numpy.uint32, numpy.uint32, numpy.float32])
+		convolute.set_scalar_arg_dtypes([None, None, None, numpy.uint32, numpy.uint32])
 
 		out = []
 
@@ -140,7 +139,7 @@ class Procedures:
 				h_c = numpy.empty((out_order,out_order)) # 24*24
 				d_c = cl.Buffer(context, cl.mem_flags.WRITE_ONLY, h_c.nbytes)
 
-				convolute(queue, (order,order), None, d_a, d_b, d_c, order, fsize, bias)
+				convolute(queue, (order,order), None, d_a, d_b, d_c, order, fsize)
 				queue.finish()
 				cl.enqueue_copy(queue, h_c, d_c)
 
@@ -148,7 +147,7 @@ class Procedures:
 				temp_out.append(h_c)
 
 			# Converting 20*8*8 into 8*8 (example) (3D->2D)
-			temp_var = numpy.sum(temp_out,axis=0)
+			temp_var = numpy.sum(temp_out,axis=0) + bias[i]
 			
 			out.append(temp_var)
 
@@ -244,3 +243,118 @@ class Procedures:
 			index.append(h_c)
 
 		return pool_out,index
+
+
+	@staticmethod
+	def conv_error(error, filters, numOffilters1, numOffilters2, order, forder):
+		kernelsource = """
+			__kernel void converror(
+		    __global double* error,
+		    __global double* filter,
+		    __global double* out,
+		    const unsigned int M,
+		    const unsigned int N)
+		    {
+				int row = get_global_id(0);
+		    	int col = get_global_id(1);
+
+		    	int k;
+		    	int l;
+		    	__local double temp;
+		    	//double temp=0.;
+		    	if(row<(M-N+1) && col<(M-N+1))
+		    	{
+		    		for(k=0;k<N;k++)
+		    		{
+		    			for(l=0;l<N;l++)
+		    			{
+		    				//barrier(CLK_GLOBAL_MEM_FENCE);
+		    				//barrier(CLK_LOCAL_MEM_FENCE);
+
+		    				temp = out[(row+k)*M + (col+l)];
+		    				//barrier(CLK_GLOBAL_MEM_FENCE);
+		    				//barrier(CLK_LOCAL_MEM_FENCE);
+		    				//barrier(CLK_GLOBAL_MEM_FENCE);
+		    				
+		    				out[(row+k)*M + (col+l)] =temp+ error[row*(M-N+1)+col]*filter[k*N+l]; 
+		    				barrier(CLK_GLOBAL_MEM_FENCE);
+		    			}
+		    		}
+		    	}
+
+		    	
+		    }
+		"""
+
+
+
+		context = cl.create_some_context()
+		queue = cl.CommandQueue(context)
+		program = cl.Program(context, kernelsource).build()
+
+		output = []
+
+		for i in range (numOffilters2):
+			h_a = error[i]
+			d_a = cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=h_a)
+
+			temp=[]
+			for j in range(numOffilters1):
+				
+				h_b = filters[i][j]
+				d_b = cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=h_b)
+
+				h_c = numpy.zeros((order,order))
+				d_c = cl.Buffer(context, cl.mem_flags.READ_WRITE, h_c.nbytes)
+
+				converror = program.converror
+				converror.set_scalar_arg_dtypes([None,None,None, numpy.uint32, numpy.uint32])
+
+				converror(queue, (8,8), None, d_a, d_b, d_c, order, forder)
+				queue.finish()
+				cl.enqueue_copy(queue, h_c, d_c)
+				temp.append(h_c)
+				h_c[numpy.isnan(h_c)] = numpy.float64(0.)
+
+				# print numpy.any(h_c>-10.)
+			output.append(temp)
+
+		return output
+
+
+		# main_order = shape[0] + forder -1
+		# m = main_order
+		# n = forder
+
+		# output = []
+
+		# for i in range(num1):
+		# 	h_c = filters[i]
+		# 	d_c = cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=h_c)
+		# 	tempo = []
+		# 	for j in range(num2):
+
+		# 		h_a = error[i][j]
+		# 		d_a = cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=h_a)
+		# 		# h_b = index[i][j]
+		# 		# d_b = cl.Buffer(context, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=h_b)
+		# 		# print h_a
+		# 		h_d = numpy.zeros((main_order,main_order))
+		# 		d_d = cl.Buffer(context, cl.mem_flags.READ_WRITE, h_d.nbytes)
+
+		# 		converror = program.converror
+		# 		converror.set_scalar_arg_dtypes([None,None,None, numpy.uint32, numpy.uint32])
+
+		# 		converror(queue, shape, None, d_a, d_c, d_d, m, n)
+		# 		queue.finish()
+		# 		cl.enqueue_copy(queue, h_d, d_d)
+		# 		# h_d = numpy.clip(h_d,-100.,100.)
+		# 		# print h_d
+		# 		h_d[numpy.isnan(h_d)] = 0.
+		# 		h_d = numpy.clip(h_d,-1000.,1000.)
+		# 		# print numpy.isnan(h_d).any()
+		# 		tempo.append(h_d)
+
+		# 	output.append(tempo)
+
+		# return output

@@ -4,6 +4,7 @@ from procedures import *
 import time		# To calculate time
 import pickle	# To write and read files
 import matplotlib.pyplot as plt 	# Graphical representation
+numpy.set_printoptions(threshold=numpy.nan)
 
 
 numOfFiltersLayer1 = 20
@@ -16,7 +17,7 @@ alpha = 0.1
 
 # epochs = 2000
 
-numofInputImages = 1
+numofInputImages = 4
 
 numOfInputs1 = 28*28		
 numOfOutputs1 = 24*24
@@ -25,9 +26,9 @@ numOfInputs2 = numOfFiltersLayer1*12*12
 numOfOutputs2 = 8*8		
 
 numOfHiddenNeurons = 100
-numOfOutputNeurons = 3
+numOfOutputNeurons = 2
 
-target = numpy.array([[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]])
+target = numpy.array([[0,0],[0,1],[1,0],[1,1]])
 
 
 # Activation Function - Sigmoid
@@ -84,6 +85,11 @@ p = Procedures()
 filters1 = []
 filters2 = []
 
+totalloss = []
+err_hl = []
+err_FC = []
+err_c2 = []
+
 # Creating filters for conv layer1
 # 20*1*5*5
 filters1 = p.initFilters(numOfFiltersLayer1, numOfInputs1, numOfOutputs1, fsize, 1)
@@ -101,15 +107,27 @@ weights_HL = p.initWeights(numOfHiddenNeurons, numOfOutputNeurons)
 # Initialise biases
 
 # Biases of Convolution layer 1
-# b1 = p.initBias(numOfFiltersLayer1)
-b1=1.
-# Start the timer
-start = time.clock()
+b1 = p.initBias(numOfFiltersLayer1)
+b2 = p.initBias(numOfFiltersLayer2)
 
-epochs = 1
+bhl = p.initBias(1)
+bFC = p.initBias(1)
+
+# Start the timer
+start = time.time()
+
+epochs = 1000
 
 # Start the training procedure
 for iterat_epoch in range(epochs):
+	print 'Running epoch: ' + str(iterat_epoch) + ' ....'
+
+	if iterat_epoch%100 == 0:
+		print '###############################################'
+		print 'Output at epoch '+str(iterat_epoch)+' is:'
+		print '###############################################'
+
+
 	for iterat_image in range(numofInputImages):
 
 		# Read one input at a time
@@ -123,7 +141,7 @@ for iterat_epoch in range(epochs):
 		# -------------------------------------- CONVOLUTION --------------------------------------------
 
 		input_data_3d = numpy.reshape(input_data, (1,28,28))
-		
+		# print input_data_3d
 		convolution_layer_1 = p.convolution(input_data_3d, filters1, numOfFiltersLayer1, 1, fsize, b1)		
 
 		convolution_layer_1_shape = array(convolution_layer_1).shape
@@ -147,8 +165,7 @@ for iterat_epoch in range(epochs):
 
 		# -------------------------------------- CONVOLUTION --------------------------------------------
 
-		# change biases
-		convolution_layer_2 = p.convolution(array(pool_layer_1), filters2, numOfFiltersLayer2, numOfFiltersLayer1, fsize, b1)
+		convolution_layer_2 = p.convolution(array(pool_layer_1), filters2, numOfFiltersLayer2, numOfFiltersLayer1, fsize, b2)
 		
 		convolution_layer_2_shape = array(convolution_layer_2).shape
 		# print convolution_layer_2
@@ -180,17 +197,21 @@ for iterat_epoch in range(epochs):
 
 		# ---------------------------------------- HIDDEN LAYER ----------------------------------------
 
-		hidden_values = numpy.dot( weights_FC.T, FC) #+ bias
+		hidden_values = numpy.dot( weights_FC.T, FC) + bhl
 
 		sigmoid_hidden_values = sigmoid(hidden_values)
 
 		# ------------------------------------------- OUTPUT ----------------------------------------
 
-		output_values = numpy.dot(weights_HL.T, sigmoid_hidden_values)
+		output_values = numpy.dot(weights_HL.T, sigmoid_hidden_values) + bFC
 
 		output = sigmoid(output_values)
 
-		print output
+		if iterat_epoch%100 == 0:
+			print '---------------------------------------------------------'
+			print 'Output for image with label '+str(iterat_image)+' is:'
+			print output
+			print '---------------------------------------------------------'
 
 		# ----------------------------------- END OF FORWARD PROPAGATION -----------------------------------
 
@@ -208,6 +229,10 @@ for iterat_epoch in range(epochs):
 
 		error = target[iterat_image] - output
 
+		loss = 0.5*error**2
+		totalloss.append(numpy.sum(loss))
+
+
 		# ------------------------------ Hidden Layer <-- Output -----------------------------------
 
 		slope_output_layer = derivative(output)
@@ -221,11 +246,15 @@ for iterat_epoch in range(epochs):
 		# + because -*- = +
 		weights_HL = weights_HL + alpha*(dweight_output)
 
+		bhl += alpha*numpy.sum(d_output) 
+
 		# -------------------------------- FC <-- Hidden Layer -----------------------------------
 
 		slope_hidden_layer = derivative(sigmoid_hidden_values)
 
 		error_hidden_layer = numpy.dot(weights_HL, d_output)
+
+		err_hl.append(numpy.sum(0.5*error_hidden_layer**2))
 
 		d_hidden_layer = error_hidden_layer*slope_hidden_layer
 
@@ -233,11 +262,15 @@ for iterat_epoch in range(epochs):
 
 		weights_FC = weights_FC + alpha*(dweight_hidden)
 
+		bFC += alpha*numpy.sum(d_hidden_layer)
+
 		# ----------------------------- CONVOLUTION LAYER 2 <-- FC -----------------------------------
 
 		slope_FC = derivative(FC)
 
 		error_FC = numpy.dot( weights_FC, d_hidden_layer)
+
+		err_FC.append(numpy.sum(0.5*error_FC**2))
 
 		d_FC = error_FC*slope_FC
 
@@ -257,6 +290,8 @@ for iterat_epoch in range(epochs):
 			# Weight updation
 			filters2[i] = w + alpha*(dw_c2)	
 
+			b2[i] += alpha*numpy.sum(d_FC_2D[i])
+
 			tomodify = numpy.zeros((8*8))
 			xx = index2_reshape[i].astype(int)
 			yy = d_FC_2D[i]
@@ -265,13 +300,104 @@ for iterat_epoch in range(epochs):
 					tomodify[ind] = rep	
 			d_FC_new.append(tomodify)
 
+		d_FC_new_reshape = numpy.reshape(d_FC_new, (40,8,8))
+
 		# --------------------- CONVOLUTION LAYER 1 <-- CONVOLUTION LAYER 2 -----------------------------------
+		
+		errr=[]
+		for n2 in range(numOfFiltersLayer2):
+			err=[]
+			for n1 in range(numOfFiltersLayer1):
+				new = numpy.zeros((12,12))
+				for ii in range(8):
+					for jj in range(8):
+						for k in range(5):
+							for l in range(5):
+								new[ii+k][jj+l] += d_FC_new_reshape[n2][ii][jj] * filters2[n2][n1][k][l]
+				err.append(new)
+			errr.append(err)
+	
+		slope_conv2 = derivative(array(pool_layer_1))
 
-		# slope_conv2 = derivative(pool_layer_1)
+		error_conv2 = numpy.sum(errr,axis=0)
 
-		# error_conv2 = numpy.dot()
+		err_c2.append(numpy.sum(0.5*error_conv2**2))
+
+		d_c2 = error_conv2*slope_conv2
+		
+		for i in range(numOfFiltersLayer1):
+			scalar_dw_c1 = numpy.outer(d_c2[i], input_data)
+
+			dw_c1 = numpy.sum(scalar_dw_c1)
+
+			w_c1 = filters1[i]
+
+			# Weight updation
+			filters1[i] = w_c1 + alpha*(dw_c1)	
+
+			b1[i] += alpha*numpy.sum(d_c2[i])
 		
 
 
-tt = time.clock()-start
-print tt
+tt = time.time()-start
+hours = tt/(3600)
+print '###################################################################'
+print 'Total Time elapsed in training the system is '+str(hours)+' Hours!'
+print 'Writing the Data to the files.....'
+
+# writing data to respective files
+file_filters1 = open("./weights/filters1.txt", "w")
+pickle.dump(filters1, file_filters1)
+file_filters1.close()
+
+file_filters2 = open("./weights/filters2.txt", "w")
+pickle.dump(filters2, file_filters2)
+file_filters2.close()
+
+file_HL_to_output = open("./weights/HL_to_output.txt", "w")
+pickle.dump(weights_HL, file_HL_to_output)
+file_HL_to_output.close()
+
+file_FC_to_HL = open("./weights/FC_to_HL.txt", "w")
+pickle.dump(weights_FC, file_FC_to_HL)
+file_FC_to_HL.close()
+
+file_b1 = open("./weights/b1.txt", "w")
+pickle.dump(b1, file_b1)
+file_b1.close()
+
+file_b2 = open("./weights/b2.txt", "w")
+pickle.dump(b2, file_b2)
+file_b2.close()
+
+file_bhl = open("./weights/bhl.txt", "w")
+pickle.dump(bhl, file_bhl)
+file_bhl.close()
+
+file_bFC = open("./weights/bFC.txt", "w")
+pickle.dump(bFC, file_bFC)
+file_bFC.close()
+
+file_totalloss = open("./weights/totalloss.txt", "w")
+pickle.dump(totalloss, file_totalloss)
+file_totalloss.close()
+
+file_err_hl = open("./weights/err_hl.txt", "w")
+pickle.dump(err_hl, file_err_hl)
+file_err_hl.close()
+
+file_err_FC = open("./weights/err_FC.txt", "w")
+pickle.dump(err_FC, file_err_FC)
+file_err_FC.close()
+
+file_err_c2 = open("./weights/err_c2.txt", "w")
+pickle.dump(err_c2, file_err_c2)
+file_err_c2.close()
+
+print 'Write Successful!'
+print 'Plotting Graph...'
+# graphX = numpy.arange(0,epochs*4)
+# graphY = array(totalloss).ravel()
+# plt.plot(graphX,graphY)
+# plt.xticks(numpy.arange(min(graphX), max(graphX)+2, 2000.0))
+# plt.show()
