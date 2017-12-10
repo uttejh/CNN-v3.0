@@ -90,33 +90,66 @@ err_hl = []
 err_FC = []
 err_c2 = []
 
-# Creating filters for conv layer1
-# 20*1*5*5
-filters1 = p.initFilters(numOfFiltersLayer1, numOfInputs1, numOfOutputs1, fsize, 1)
-# print filters1[0]
-# 40*20*5*5
-filters2 = p.initFilters(numOfFiltersLayer2, numOfInputs2, numOfOutputs2, fsize, numOfFiltersLayer1)
-# print filters2[0]
+# # Creating filters for conv layer1
+# # 20*1*5*5
+# filters1 = p.initFilters(numOfFiltersLayer1, numOfInputs1, numOfOutputs1, fsize, 1)
+# # print filters1[0]
+# # 40*20*5*5
+# filters2 = p.initFilters(numOfFiltersLayer2, numOfInputs2, numOfOutputs2, fsize, numOfFiltersLayer1)
+# # print filters2[0]
 
-# Initialising weights of FC Layer
-weights_FC = p.initWeights(640,numOfHiddenNeurons) # FC.shape[0]=640
+# # Initialising weights of FC Layer
+# weights_FC = p.initWeights(640,numOfHiddenNeurons) # FC.shape[0]=640
 
-# Initialising weights of Hidden Layer
-weights_HL = p.initWeights(numOfHiddenNeurons, numOfOutputNeurons)
+# # Initialising weights of Hidden Layer
+# weights_HL = p.initWeights(numOfHiddenNeurons, numOfOutputNeurons)
 
-# Initialise biases
+# # Initialise biases
 
-# Biases of Convolution layer 1
-b1 = p.initBias(numOfFiltersLayer1)
-b2 = p.initBias(numOfFiltersLayer2)
+# # Biases of Convolution layer 1
+# b1 = p.initBias(numOfFiltersLayer1)
+# b2 = p.initBias(numOfFiltersLayer2)
 
-bhl = p.initBias(1)
-bFC = p.initBias(1)
+# bhl = p.initBias(1)
+# bFC = p.initBias(1)
+
+f = open('./weights/filters1.txt')
+filters1 = pickle.load(f)
+f.close()
+
+f = open('./weights/filters2.txt')
+filters2 = pickle.load(f)
+f.close()
+
+f = open('./weights/FC_to_HL.txt')
+weights_FC = pickle.load(f)
+f.close()
+
+f = open('./weights/HL_to_output.txt')
+weights_HL = pickle.load(f)
+f.close()
+
+f = open('./weights/b1.txt')
+b1 = pickle.load(f)
+f.close()
+
+f = open('./weights/b2.txt')
+b2 = pickle.load(f)
+f.close()
+
+f = open('./weights/bhl.txt')
+bhl = pickle.load(f)
+f.close()
+
+f = open('./weights/bFC.txt')
+bFC = pickle.load(f)
+f.close()
+
 
 # Start the timer
 start = time.time()
 
-epochs = 1000
+epochs = 500
 
 # Start the training procedure
 for iterat_epoch in range(epochs):
