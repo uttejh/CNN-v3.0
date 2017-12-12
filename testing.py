@@ -256,33 +256,39 @@ for iterat_image in range(400):
 	output = output.round()
 	predicted=0.
 	predicted = (output[0]*2.) + (output[1]*1.)
-	print str(predicted) + ' - ' + str(target[iterat_image])
+	# print str(predicted) + ' - ' + str(target[iterat_image])
 	if(predicted == target[iterat_image]):
 		count += 1
-	if iterat_image==99:
-		acc=float(count)/4
-		print 'The System accuracy is '+ str(acc)
-		print acc
-		count=0
-	if iterat_image==199:
-		acc=float(count)/4
-		print 'The System accuracy is '+ str(acc)
+
+		print str(output) + '==' + str(target[iterat_image]) + '---' + str(count)
+
+	
+
+	# if iterat_image==99:
+	# 	acc=float(count)/4
+	# 	print 'The System accuracy is '+ str(acc)
+	# 	print acc
+	# 	count=0
+	# if iterat_image==199:
+	# 	acc=float(count)/4
+	# 	print 'The System accuracy is '+ str(acc)
 		
 
-		count=0
-	if iterat_image==299:
-		acc=float(count)/4
-		print 'The System accuracy is '+ str(acc)
+	# 	count=0
+	# if iterat_image==299:
+	# 	acc=float(count)/4
+	# 	print 'The System accuracy is '+ str(acc)
 		
 
-		count=0
-	if iterat_image==399:
-		acc=float(count)/4
-		print 'The System accuracy is '+ str(acc)
+	# 	count=0
+	# if iterat_image==399:
+	# 	acc=float(count)/4
+	# 	print 'The System accuracy is '+ str(acc)
 		
 
-		count=0
-
+	# 	count=0
+acc=float(count)/4
+print 'The System accuracy is '+ str(acc)
 tt = time.time()-start
 hours = tt/(60)
 print '###################################################################'

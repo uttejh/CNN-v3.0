@@ -260,23 +260,27 @@ class Procedures:
 
 		    	int k;
 		    	int l;
-		    	__local double temp;
-		    	//double temp=0.;
+		    	//__local double temp;
+		    	double temp=0.;
+		    	double temp2=0.;
+
 		    	if(row<(M-N+1) && col<(M-N+1))
 		    	{
 		    		for(k=0;k<N;k++)
 		    		{
 		    			for(l=0;l<N;l++)
 		    			{
-		    				//barrier(CLK_GLOBAL_MEM_FENCE);
+		    				barrier(CLK_GLOBAL_MEM_FENCE);
 		    				//barrier(CLK_LOCAL_MEM_FENCE);
 
 		    				temp = out[(row+k)*M + (col+l)];
 		    				//barrier(CLK_GLOBAL_MEM_FENCE);
 		    				//barrier(CLK_LOCAL_MEM_FENCE);
-		    				//barrier(CLK_GLOBAL_MEM_FENCE);
-		    				
-		    				out[(row+k)*M + (col+l)] =temp+ error[row*(M-N+1)+col]*filter[k*N+l]; 
+		    				barrier(CLK_GLOBAL_MEM_FENCE);
+		    				temp2 = error[row*(M-N+1)+col]*filter[k*N+l];
+		    				barrier(CLK_GLOBAL_MEM_FENCE);
+
+		    				out[(row+k)*M + (col+l)] =temp+ temp2; 
 		    				barrier(CLK_GLOBAL_MEM_FENCE);
 		    			}
 		    		}

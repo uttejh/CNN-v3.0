@@ -69,6 +69,15 @@ def readAllImages():
 		image = Image.open(name)
 
 		im = numpy.array( image, dtype="double" ) 
+		
+		# im = numpy.roll(im,-1,axis=0) # expand up
+
+		# im = numpy.roll(im,1,axis=0) # expand down
+
+		im = numpy.roll(im,2,axis=1) # expand right
+
+		# im = numpy.roll(im,-2,axis=1) # expand left
+			
 
 		# Normalizing data so that each column of Z has mean 0 and standard 1
 		# also called as Z-score normalization
@@ -85,7 +94,6 @@ p = Procedures()
 filters1 = []
 filters2 = []
 
-totalloss = []
 err_hl = []
 err_FC = []
 err_c2 = []
@@ -144,6 +152,8 @@ f.close()
 f = open('./weights/bFC.txt')
 bFC = pickle.load(f)
 f.close()
+
+totalloss = []
 
 
 # Start the timer
@@ -349,7 +359,7 @@ for iterat_epoch in range(epochs):
 								new[ii+k][jj+l] += d_FC_new_reshape[n2][ii][jj] * filters2[n2][n1][k][l]
 				err.append(new)
 			errr.append(err)
-	
+
 		slope_conv2 = derivative(array(pool_layer_1))
 
 		error_conv2 = numpy.sum(errr,axis=0)
