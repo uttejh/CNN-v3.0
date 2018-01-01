@@ -1,0 +1,57 @@
+Step 1: Start
+
+Step 2: Assign values to all parameters such as Learning rate, Number 		  of feature maps, Number of Hidden neurons
+
+Step 3: Read all Training images and convert them into pixel values
+
+Step 4: Normalize the input data using Z-score normalization
+
+Step 5: Initialise weights and biases
+
+Step 6: Start the timer
+
+Step 7: For each epoch
+
+Step 8: 	For each training image
+
+Step 9:			 Perform Convolution on each image
+
+Step 10:		 Normalize the output
+
+Step 11: 		 Apply Activation function
+
+Step 12: 		 Perform Pooling
+
+Step 13:		 Repeat steps 9 to 12 once more
+
+Step 14:		 Concatenate Pooling output to form Fully Connected 				 layer
+
+Step 15: 		 Perform dot product between weights of FC layer and 				  inputs
+
+Step 16:		 Perform dot product between weights of Hidden layer 				  and output from FC layer
+
+Step 17:		 Assign the above Output to variable output
+
+Step 18:		 Perform Back Propagation for each layer by
+
+Step 19:		 	 Calculate slope
+
+Step 20:			 Calculate error
+
+Step 21:			 Calculate Change factor
+
+Step 22:			 Calculate Change in weight (dW)
+
+Step 23:			 Update weights by removing learning rate*dW from 					   the weights
+
+Step 24: Stop the timer
+
+Step 25: Calculate time taken to train the system
+
+Step 26: Print Results
+
+Step 27: Write weights to the respective files
+
+Step 28: Plot the graph
+
+Step 29: End

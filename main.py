@@ -25,10 +25,10 @@ numOfOutputs1 = 24*24
 numOfInputs2 = numOfFiltersLayer1*12*12		
 numOfOutputs2 = 8*8		
 
-numOfHiddenNeurons = 100
+numOfHiddenNeurons = 200
 numOfOutputNeurons = 2
 
-target = numpy.array([[0,0],[0,1],[1,0],[1,1]])
+target = numpy.array([[0.,0.],[0.,1.],[1.,0.],[1.,1.]])
 
 
 # Activation Function - Sigmoid
@@ -65,7 +65,7 @@ def zscore(x):
 def readAllImages():
 	data = []
 	for i in range(numofInputImages):
-		name = './dataset/'+str(i)+'.jpg'
+		name = './dataset3/'+str(i)+'.png'
 		image = Image.open(name)
 
 		im = numpy.array( image, dtype="double" ) 
@@ -74,7 +74,7 @@ def readAllImages():
 
 		# im = numpy.roll(im,1,axis=0) # expand down
 
-		im = numpy.roll(im,2,axis=1) # expand right
+		# im = numpy.roll(im,2,axis=1) # expand right
 
 		# im = numpy.roll(im,-2,axis=1) # expand left
 			
@@ -255,6 +255,11 @@ for iterat_epoch in range(epochs):
 			print 'Output for image with label '+str(iterat_image)+' is:'
 			print output
 			print '---------------------------------------------------------'
+		if iterat_epoch == epochs-1:
+			print '---------------------------------------------------------'
+			print 'Final Output for image with label '+str(iterat_image)+' is:'
+			print output
+			print '---------------------------------------------------------'
 
 		# ----------------------------------- END OF FORWARD PROPAGATION -----------------------------------
 
@@ -380,7 +385,6 @@ for iterat_epoch in range(epochs):
 
 			b1[i] += alpha*numpy.sum(d_c2[i])
 		
-
 
 tt = time.time()-start
 hours = tt/(3600)

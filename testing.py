@@ -25,7 +25,7 @@ numOfOutputs1 = 24*24
 numOfInputs2 = numOfFiltersLayer1*12*12		
 numOfOutputs2 = 8*8		
 
-numOfHiddenNeurons = 100
+# numOfHiddenNeurons =300
 numOfOutputNeurons = 2
 
 target = numpy.array([[0,0],[0,1],[1,0],[1,1]])
@@ -65,9 +65,9 @@ def zscore(x):
 def readAllImages():
 	data = []
 	for i in range(numofInputImages):
-		for j in range(100):
+		for j in range(25):
 
-			name = './testDataset/'+str(i)+' ('+ str(j+1) +').png'
+			name = './new/'+str(i)+' ('+ str(j+1) +').png'
 			image = Image.open(name)
 
 			im = numpy.array( image, dtype="double" ) 
@@ -147,29 +147,33 @@ f.close()
 f = open('./weights/bFC.txt')
 bFC = pickle.load(f)
 f.close()
-
 count = 0
 
 # Start the timer
 
 target=[]
 # epochs = 1000
-for i in range(100):
+for i in range(25):
 	target.append(0.)
-for i in range(100):
+for i in range(25):
 	target.append(1.)
-for i in range(100):
+for i in range(25):
 	target.append(2.)
-for i in range(100):
+for i in range(25):
 	target.append(3.)
 
+
+individualcount =0
 # if iterat_epoch%100 == 0:
 # 	print '###############################################'
 # 	print 'Output at epoch '+str(iterat_epoch)+' is:'
 # 	print '###############################################'
 start = time.time()
-
-for iterat_image in range(400):
+print '-------------------------------------------'
+print 'The netwotk correctly predicted:'
+print '-------------------------------------------'
+for iterat_image in range(100):
+	
 	# print 'Running iteration '+ str(iterat_image)
 	# Read one input at a time
 	input_data = imagedata[iterat_image]
@@ -259,8 +263,23 @@ for iterat_image in range(400):
 	# print str(predicted) + ' - ' + str(target[iterat_image])
 	if(predicted == target[iterat_image]):
 		count += 1
-
-		print str(output) + '==' + str(target[iterat_image]) + '---' + str(count)
+		individualcount +=1
+		# print str(iterat_image+1)
+		# print iterat_image
+		# print str(output) + '==' + str(target[iterat_image]) + '---' + str(count)
+	
+	if iterat_image == 24:
+		print str(individualcount) +"/25 - 0's"
+		individualcount = 0
+	if iterat_image == 49:
+		print str(individualcount) +"/25 - 1's"
+		individualcount = 0
+	if iterat_image == 74:
+		print str(individualcount) +"/25 - 2's"
+		individualcount = 0
+	if iterat_image == 99:
+		print str(individualcount) +"/25 - 3's"
+		individualcount = 0
 
 	
 
@@ -287,16 +306,18 @@ for iterat_image in range(400):
 		
 
 	# 	count=0
-acc=float(count)/4
-print 'The System accuracy is '+ str(acc)
+acc=float(count)
+print 'The System accuracy is '+ str(acc) +'%'
 tt = time.time()-start
 hours = tt/(60)
+print '-------------------------------------------'
 print '###################################################################'
 print 'Total Time elapsed in testing the system is '+str(hours)+' Minutes!'
+# print ""
+# print "######################################################"
+# print "#			RESULTS				#"
+# print "######################################################"
 print ""
-print "######################################################"
-print "#			RESULTS				#"
-print "######################################################"
+print 'The System accuracy is '+ str(acc) +'%'
 print ""
-print 'The System accuracy is '+ str(acc)
 
