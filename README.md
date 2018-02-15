@@ -12,9 +12,9 @@ based on the <a href="http://neuralnetworksanddeeplearning.com/">book</a> by <a 
 
 # Authors
 <ul>
-  <li><a href="https://github.com/uttejh"></a>Uttejh reddy</li>
-  <li><a href="https://github.com/sumeesha"></a>Sumeesha marakani</li>
-  <li><a href="https://github.com/nprithviraj24"></a>Prithvi raj</li>
+  <li><a href="https://github.com/uttejh">Uttejh reddy</a></li>
+  <li><a href="https://github.com/sumeesha">Sumeesha marakani</a></li>
+  <li><a href="https://github.com/nprithviraj24">Prithvi raj</a></li>
 </ul>
 
 # License
