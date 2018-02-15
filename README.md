@@ -10,6 +10,8 @@ based on the <a href="http://neuralnetworksanddeeplearning.com/">book</a> by <a 
   <li><a href="https://www.khronos.org/opencl/">Opencl</a> - open standard for parallel programming of heterogeneous systems</li>
 </ul>
 
+# Changes
+
 # Authors
 <ul>
   <li><a href="https://github.com/uttejh">Uttejh reddy</a></li>
