@@ -1,8 +1,9 @@
 # CNN-v3.0
 
 A Convolutional Neural Network used for the recognition of Handwritten characters (numbers) using Deep Learning. The system was
-purely implemented from the scratch without using any existing tools such as Tensorflow, Matlab, Keras, etc... The architecture is
+purely implemented from the scratch in python without using any existing tools such as Tensorflow, Matlab, Keras, etc... and the performance was parallelized with the help of OpenCl. The architecture is
 based on the <a href="http://neuralnetworksanddeeplearning.com/">book</a> by <a href="http://michaelnielsen.org/">Michael Nielsen</a>.
+      The system was trained using very small datasets for around 30000 epochs and has achieved an accuracy of 79%.
 
 # Built-With
 <ul>
@@ -11,6 +12,12 @@ based on the <a href="http://neuralnetworksanddeeplearning.com/">book</a> by <a 
 </ul>
 
 # Changes
+The changes from the previous version (v2) are as follows:-
+<ul>
+  <li>The activation function is changed from ReLu to Sigmoid</li>
+  <li>Normalisation layers were added</li>
+  <li>Redundant functions were removed</li>
+</ul>
 
 # Authors
 <ul>
